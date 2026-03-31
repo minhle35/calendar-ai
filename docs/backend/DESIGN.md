@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The Calendar AI backend is a robust, scalable Java Enterprise Edition application that provides comprehensive calendar management, event scheduling, and collaboration features. Designed with clean architecture principles, it emphasizes security, performance, and maintainability.
+The Calendar AI backend is a scalable Java Enterprise Edition application that provides comprehensive calendar management, event scheduling, and collaboration features. Designed with clean architecture principles, it emphasizes security, performance, and maintainability.
 
 ## Architecture Overview
 
