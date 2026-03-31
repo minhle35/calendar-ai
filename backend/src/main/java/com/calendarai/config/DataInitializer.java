@@ -11,6 +11,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 // Runs once after the application context is fully started.
 // Only active when the "dev" profile is active (or no profile — default).
 // Skipped in production via @Profile.
@@ -19,6 +21,11 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
+
+    // Fixed UUIDs so the frontend hardcoded TEMP_USER_ID always matches across restarts
+    static final UUID ALICE_ID   = UUID.fromString("018f1a2b-0000-7000-8000-000000000001");
+    static final UUID BOB_ID     = UUID.fromString("018f1a2b-0000-7000-8000-000000000002");
+    static final UUID CHARLIE_ID = UUID.fromString("018f1a2b-0000-7000-8000-000000000003");
 
     private final UserRepository userRepository;
     private final CalendarRepository calendarRepository;
@@ -38,14 +45,19 @@ public class DataInitializer implements ApplicationRunner {
         log.info("Seeding development data...");
 
         // ── Users ──────────────────────────────────────────────────────────────
-        // Passwords are placeholder hashes — replace with real bcrypt in auth step
-        User alice   = userRepository.save(new User("Alice",   "Smith",   "alice@example.com",   "$2a$12$placeholder_hash_alice"));
-        User bob     = userRepository.save(new User("Bob",     "Johnson", "bob@example.com",     "$2a$12$placeholder_hash_bob"));
-        User charlie = userRepository.save(new User("Charlie", "Lee",     "charlie@example.com", "$2a$12$placeholder_hash_charlie"));
+        User alice   = new User("Alice",   "Smith",   "alice@example.com",   "$2a$12$placeholder_hash_alice");
+        User bob     = new User("Bob",     "Johnson", "bob@example.com",     "$2a$12$placeholder_hash_bob");
+        User charlie = new User("Charlie", "Lee",     "charlie@example.com", "$2a$12$placeholder_hash_charlie");
 
+        alice.setId(ALICE_ID);
         alice.setTimezone("Australia/Sydney");
+
+        bob.setId(BOB_ID);
         bob.setTimezone("America/New_York");
+
+        charlie.setId(CHARLIE_ID);
         charlie.setTimezone("Europe/London");
+
         userRepository.save(alice);
         userRepository.save(bob);
         userRepository.save(charlie);
