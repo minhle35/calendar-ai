@@ -1,2 +1,12 @@
-# build files
-target/*
+# build output
+target/
+
+# Compiled Class files
+*.class
+
+# Log file
+*.log
+
+# IDE
+.vscode/
+.idea/
