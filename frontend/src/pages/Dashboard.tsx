@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { CalendarView } from '@/components/calendar/CalendarView'
 import { api } from '@/api/client'
-import type { CalendarResponse } from '@/types'
+import type { CalendarResponse, DaySettings } from '@/types'
 
 export function Dashboard() {
-  const [calendars, setCalendars] = useState<CalendarResponse[]>([])
+  const [calendars, setCalendars]   = useState<CalendarResponse[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [settings, setSettings]     = useState<DaySettings>({ startHour: 6, endHour: 22 })
 
   useEffect(() => {
     api.calendars.list().then(data => {
@@ -34,11 +35,17 @@ export function Dashboard() {
       <Sidebar
         calendars={calendars}
         selectedCalendarId={selectedId}
+        settings={settings}
         onSelectCalendar={setSelectedId}
         onCreateCalendar={handleCreateCalendar}
+        onSettingsChange={setSettings}
       />
       <main className="flex flex-1 flex-col overflow-hidden">
-        <CalendarView calendar={selectedCalendar} />
+        <CalendarView
+          calendar={selectedCalendar}
+          calendars={calendars}
+          settings={settings}
+        />
       </main>
     </div>
   )
