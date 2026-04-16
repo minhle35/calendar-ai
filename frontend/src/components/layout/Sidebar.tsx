@@ -1,16 +1,25 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, Settings, User, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { CalendarResponse } from '@/types'
+import type { CalendarResponse, DaySettings } from '@/types'
+
+const HOURS = Array.from({ length: 24 }, (_, i) => i)
+function fmtHour(h: number) {
+  if (h === 0)  return '12 AM'
+  if (h === 12) return '12 PM'
+  return h < 12 ? `${h} AM` : `${h - 12} PM`
+}
 
 interface SidebarProps {
   calendars: CalendarResponse[]
   selectedCalendarId: string | null
+  settings: DaySettings
   onSelectCalendar: (id: string) => void
   onCreateCalendar: () => void
+  onSettingsChange: (s: DaySettings) => void
 }
 
-export function Sidebar({ calendars, selectedCalendarId, onSelectCalendar, onCreateCalendar }: SidebarProps) {
+export function Sidebar({ calendars, selectedCalendarId, settings, onSelectCalendar, onCreateCalendar, onSettingsChange }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const [activeSection, setActiveSection] = useState<'calendars' | 'profile' | 'settings'>('calendars')
 
@@ -41,8 +50,8 @@ export function Sidebar({ calendars, selectedCalendarId, onSelectCalendar, onCre
       <nav className="flex flex-col gap-1 p-2 border-b border-gray-100">
         {[
           { key: 'calendars', icon: Calendar, label: 'Calendars' },
-          { key: 'settings', icon: Settings, label: 'Calendar Settings' },
-          { key: 'profile',  icon: User,     label: 'Profile Settings' },
+          { key: 'settings',  icon: Settings, label: 'Calendar Settings' },
+          { key: 'profile',   icon: User,     label: 'Profile Settings' },
         ].map(({ key, icon: Icon, label }) => (
           <button
             key={key}
@@ -62,6 +71,7 @@ export function Sidebar({ calendars, selectedCalendarId, onSelectCalendar, onCre
       {/* Section content */}
       {!collapsed && (
         <div className="flex-1 overflow-y-auto p-3">
+
           {activeSection === 'calendars' && (
             <div className="space-y-1">
               <div className="flex items-center justify-between px-1 mb-2">
@@ -79,14 +89,9 @@ export function Sidebar({ calendars, selectedCalendarId, onSelectCalendar, onCre
                     selectedCalendarId === cal.id && 'bg-gray-100 font-medium'
                   )}
                 >
-                  <span
-                    className="h-3 w-3 shrink-0 rounded-full"
-                    style={{ backgroundColor: cal.color }}
-                  />
+                  <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: cal.color }} />
                   <span className="truncate">{cal.name}</span>
-                  {cal.isDefault && (
-                    <span className="ml-auto text-[10px] text-gray-400">default</span>
-                  )}
+                  {cal.isDefault && <span className="ml-auto text-[10px] text-gray-400">default</span>}
                 </button>
               ))}
             </div>
@@ -96,10 +101,38 @@ export function Sidebar({ calendars, selectedCalendarId, onSelectCalendar, onCre
             <div className="space-y-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 px-1">Calendar Settings</p>
               <div className="space-y-3">
-                <SettingRow label="Week starts on" value="Monday" />
-                <SettingRow label="Time format" value="24-hour" />
-                <SettingRow label="Default view" value="Month" />
-                <SettingRow label="Show weekends" value="Yes" />
+
+                {/* Day start time */}
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-500">Day starts at</label>
+                  <select
+                    value={settings.startHour}
+                    onChange={e => onSettingsChange({ ...settings, startHour: Number(e.target.value) })}
+                    className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700 outline-none focus:border-blue-400"
+                  >
+                    {HOURS.filter(h => h < settings.endHour).map(h => (
+                      <option key={h} value={h}>{fmtHour(h)}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Day end time */}
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-500">Day ends at</label>
+                  <select
+                    value={settings.endHour}
+                    onChange={e => onSettingsChange({ ...settings, endHour: Number(e.target.value) })}
+                    className="w-full rounded-md border border-gray-200 px-2 py-1.5 text-xs text-gray-700 outline-none focus:border-blue-400"
+                  >
+                    {HOURS.filter(h => h > settings.startHour).map(h => (
+                      <option key={h} value={h}>{fmtHour(h)}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <SettingRow label="Week starts on" value="Sunday" />
+                <SettingRow label="Time format"    value="12-hour" />
+                <SettingRow label="Show weekends"  value="Yes" />
               </div>
             </div>
           )}
@@ -108,13 +141,14 @@ export function Sidebar({ calendars, selectedCalendarId, onSelectCalendar, onCre
             <div className="space-y-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 px-1">Profile Settings</p>
               <div className="space-y-3">
-                <SettingRow label="Display name" value="Alice Smith" />
-                <SettingRow label="Email" value="alice@example.com" />
-                <SettingRow label="Timezone" value="Australia/Sydney" />
-                <SettingRow label="Notifications" value="Email" />
+                <SettingRow label="Display name"  value="Alice Smith" />
+                <SettingRow label="Email"          value="alice@example.com" />
+                <SettingRow label="Timezone"       value="Australia/Sydney" />
+                <SettingRow label="Notifications"  value="Email" />
               </div>
             </div>
           )}
+
         </div>
       )}
     </aside>
